@@ -2,10 +2,21 @@
 import Image from "next/image";
 import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
 import axios from "axios";
-
-
+import ProtectedRoute from "./components/ProtectedRoute";
+import { useRouter } from "next/navigation";
+import TalkingAvatar, { startLipSync } from "./components/TalkingAvatar";
+import { useRef } from "react";
+import * as THREE from "three";
 
 export default function Home() {
+  const router = useRouter();
+  const avatarRef = useRef<React.RefObject<THREE.Object3D> | null>(null);
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userEmail");
+    router.push("/login");
+  };
   async function handleStartAgent(){
     const response = await axios.get("/api");
     const agent = new RealtimeAgent({
@@ -39,27 +50,59 @@ export default function Home() {
       model: "gpt-4o-mini-realtime-preview-2025-06-03",
     });
     await session.connect({ apiKey: response.data?.key })
+
+    session.on("audio", (event) => {
+      // Access the audio data from the event
+      const audio = (event as any).audio || event;
+      const blob = new Blob([audio], { type: "audio/wav" });
+      const url = URL.createObjectURL(blob);
+
+      const audioEl = new Audio(url);
+      audioEl.play();
+
+      if (avatarRef.current) {
+        startLipSync(audioEl, avatarRef.current);
+      }
+    });
     console.log("Started calling agent")
   }
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+    <ProtectedRoute>
+      <div className="font-sans min-h-screen">
+        <header className="w-full flex justify-between items-center p-4 bg-gray-100">
+          <h1 className="text-xl font-bold">Voice Agent</h1>
           <button
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            onClick={() => handleStartAgent()}
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Start Agent
+            Logout
           </button>
+        </header>
+        
+        <div className="flex h-screen">
+          {/* Avatar Section */}
+          <div className="flex-1">
+            <TalkingAvatar onAvatarRef={(ref) => { avatarRef.current = ref; }} />
+          </div>
+          
+          {/* Controls Section */}
+          <div className="w-80 bg-gray-50 p-6 flex flex-col justify-center items-center gap-4">
+            <button
+              className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+              onClick={() => handleStartAgent()}
+            >
+              <Image
+                className="dark:invert"
+                src="/vercel.svg"
+                alt="Vercel logomark"
+                width={20}
+                height={20}
+              />
+              Start Voice Call With Your Girlfriend
+            </button>
+          </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }
