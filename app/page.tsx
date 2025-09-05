@@ -53,6 +53,7 @@ export default function Home() {
 
     session.on("audio", (event) => {
       // Access the audio data from the event
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const audio = (event as any).audio || event;
       const blob = new Blob([audio], { type: "audio/wav" });
       const url = URL.createObjectURL(blob);

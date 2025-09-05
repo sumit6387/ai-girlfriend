@@ -34,6 +34,7 @@ export default function Login() {
         setError(data.message || "Login failed");
       }
     } catch (error) {
+      console.log(error)
       setError("An error occurred during login");
     } finally {
       setLoading(false);
