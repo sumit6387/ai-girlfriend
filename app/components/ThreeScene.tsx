@@ -56,35 +56,44 @@ export default function ThreeScene({ onAvatarRef }: ThreeSceneProps) {
       scene.add(sphere);
     };
 
-    // Try to load the GLB model, fallback to sphere if it fails
+    // Create fallback avatar immediately
+    createFallbackAvatar();
+
+    // Try to load the GLB model in the background
     const loadModel = async () => {
       try {
-        const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
-        const loader = new GLTFLoader();
+        // Use a more robust import method
+        const GLTFLoaderModule = await import('three/examples/jsm/loaders/GLTFLoader.js');
+        const GLTFLoader = GLTFLoaderModule.GLTFLoader;
         
-        loader.load(
-          "https://models.readyplayer.me/68b9f4396462b71c488cd8ce.glb",
-          (gltf) => {
-            if (avatarRef.current) {
-              scene.remove(avatarRef.current);
+        if (GLTFLoader) {
+          const loader = new GLTFLoader();
+          
+          loader.load(
+            "https://models.readyplayer.me/68b9f4396462b71c488cd8ce.glb",
+            (gltf) => {
+              if (avatarRef.current) {
+                scene.remove(avatarRef.current);
+              }
+              avatarRef.current = gltf.scene;
+              avatarRef.current.position.set(0, -1.5, 0);
+              scene.add(avatarRef.current);
+            },
+            undefined,
+            (error) => {
+              console.error('Error loading GLB model:', error);
+              // Keep the fallback avatar
             }
-            avatarRef.current = gltf.scene;
-            avatarRef.current.position.set(0, -1.5, 0);
-            scene.add(avatarRef.current);
-          },
-          undefined,
-          (error) => {
-            console.error('Error loading GLB model:', error);
-            createFallbackAvatar();
-          }
-        );
+          );
+        }
       } catch (error) {
         console.error('Error loading GLTFLoader:', error);
-        createFallbackAvatar();
+        // Keep the fallback avatar
       }
     };
 
-    loadModel();
+    // Load model after a short delay to ensure scene is ready
+    setTimeout(loadModel, 100);
 
     camera.position.z = 2.5;
 
