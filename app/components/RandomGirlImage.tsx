@@ -44,41 +44,22 @@ export default function RandomGirlImage({ onImageRef }: RandomGirlImageProps) {
 
   if (!currentImage) {
     return (
-      <div style={{ 
-        width: "100%", 
-        height: "100vh", 
-        display: "flex", 
-        alignItems: "center", 
-        justifyContent: "center",
-        backgroundColor: "#f0f0f0"
-      }}>
-        <div>Loading...</div>
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-pink-600 font-medium">Loading your girlfriend...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      width: "100%", 
-      height: "100vh", 
-      display: "flex", 
-      alignItems: "center", 
-      justifyContent: "center",
-      backgroundColor: "#f8f9fa",
-      position: "relative"
-    }}>
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 relative overflow-hidden">
       <img
         ref={imageRef}
         src={currentImage}
         alt="Random Indian Girl"
-        style={{
-          width: "300px",
-          height: "400px",
-          objectFit: "cover",
-          borderRadius: "20px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-          border: "3px solid #fff"
-        }}
+        className="w-64 h-80 sm:w-72 sm:h-96 md:w-80 md:h-[28rem] lg:w-72 lg:h-96 xl:w-80 xl:h-[28rem] object-cover rounded-3xl shadow-2xl border-4 border-white transition-all duration-300 hover:scale-105"
         onError={() => {
           // Fallback to a different image if current one fails
           const randomIndex = Math.floor(Math.random() * indianGirlImages.length);
@@ -89,22 +70,16 @@ export default function RandomGirlImage({ onImageRef }: RandomGirlImageProps) {
       {/* Change Image Button */}
       <button
         onClick={changeImage}
-        style={{
-          position: "absolute",
-          top: "20px",
-          right: "20px",
-          padding: "10px 15px",
-          backgroundColor: "#007bff",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          fontSize: "14px",
-          fontWeight: "bold"
-        }}
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-none rounded-lg cursor-pointer text-xs sm:text-sm font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 z-10"
       >
-        Change Image
+        <span className="hidden sm:inline">Change Image</span>
+        <span className="sm:hidden">🔄</span>
       </button>
+      
+      {/* Decorative Elements */}
+      <div className="absolute top-1/2 left-4 w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
+      <div className="absolute top-1/3 right-8 w-1 h-1 bg-purple-400 rounded-full animate-pulse delay-1000"></div>
+      <div className="absolute bottom-1/4 left-8 w-1.5 h-1.5 bg-pink-300 rounded-full animate-pulse delay-500"></div>
     </div>
   );
 }
