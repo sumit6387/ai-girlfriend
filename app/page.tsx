@@ -4,13 +4,12 @@ import { RealtimeAgent, RealtimeSession } from '@openai/agents-realtime';
 import axios from "axios";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useRouter } from "next/navigation";
-import TalkingAvatar, { startLipSync } from "./components/TalkingAvatar";
+import RandomGirlImage from "./components/RandomGirlImage";
 import { useRef } from "react";
-import * as THREE from "three";
 
 export default function Home() {
   const router = useRouter();
-  const avatarRef = useRef<React.RefObject<THREE.Object3D> | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -60,10 +59,9 @@ export default function Home() {
 
       const audioEl = new Audio(url);
       audioEl.play();
-
-      if (avatarRef.current) {
-        startLipSync(audioEl, avatarRef.current);
-      }
+      
+      // No lip sync needed for static image
+      console.log("Audio playing with static image");
     });
     console.log("Started calling agent")
   }
@@ -81,9 +79,9 @@ export default function Home() {
         </header>
         
         <div className="flex h-screen">
-          {/* Avatar Section */}
+          {/* Image Section */}
           <div className="flex-1">
-            <TalkingAvatar onAvatarRef={(ref) => { avatarRef.current = ref; }} />
+            <RandomGirlImage onImageRef={(ref) => { imageRef.current = ref.current; }} />
           </div>
           
           {/* Controls Section */}
